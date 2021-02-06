@@ -1,39 +1,66 @@
 package day17;
 
-public class Task2 {
-    public static void main(String[] args) {
-        ChessPiece[][] chessPieces = new ChessPiece[8][8];
+import java.util.HashMap;
+import java.util.Map;
 
+public class Task2 {
+    private static Map<Character, Integer> indexes;
+    private static ChessPiece[][] chessPieces;
+
+    public static void main(String[] args) {
+        indexes = fillMap();
+        chessPieces = new ChessPiece[8][8];
+        fillChessPieces();
+
+        addFigure(8, 'a', ChessPiece.ROOK_BLACK);
+        addFigure(8, 'f', ChessPiece.ROOK_BLACK);
+        addFigure(8, 'g', ChessPiece.KING_BLACK);
+        addFigure(7, 'b', ChessPiece.ROOK_WHITE);
+        addFigure(7, 'e', ChessPiece.PAWN_BLACK);
+        addFigure(7, 'f', ChessPiece.PAWN_BLACK);
+        addFigure(7, 'h', ChessPiece.PAWN_BLACK);
+        addFigure(6, 'a', ChessPiece.PAWN_BLACK);
+        addFigure(6, 'c', ChessPiece.KNIGHT_BLACK);
+        addFigure(6, 'g', ChessPiece.PAWN_BLACK);
+        addFigure(5, 'a', ChessPiece.QUEEN_BLACK);
+        addFigure(5, 'd', ChessPiece.BISHOP_WHITE);
+        addFigure(4, 'd', ChessPiece.BISHOP_BLACK);
+        addFigure(4, 'e', ChessPiece.PAWN_WHITE);
+        addFigure(3, 'e', ChessPiece.BISHOP_WHITE);
+        addFigure(3, 'f', ChessPiece.PAWN_WHITE);
+        addFigure(2, 'a', ChessPiece.PAWN_WHITE);
+        addFigure(2, 'd', ChessPiece.QUEEN_WHITE);
+        addFigure(2, 'f', ChessPiece.PAWN_WHITE);
+        addFigure(2, 'h', ChessPiece.PAWN_WHITE);
+        addFigure(1, 'f', ChessPiece.ROOK_WHITE);
+        addFigure(1, 'g', ChessPiece.KING_WHITE);
+
+        ChessBoard chessBoard = new ChessBoard(chessPieces);
+        chessBoard.print();
+    }
+
+    private static void fillChessPieces() {
         for (int i = 0; i < chessPieces.length; i++) {
             for (int j = 0; j < chessPieces[i].length; j++) {
                 chessPieces[i][j] = ChessPiece.EMPTY;
             }
         }
+    }
 
-        chessPieces[0][0] = ChessPiece.ROOK_BLACK;
-        chessPieces[0][5] = ChessPiece.ROOK_BLACK;
-        chessPieces[0][6] = ChessPiece.KING_BLACK;
-        chessPieces[1][1] = ChessPiece.ROOK_WHITE;
-        chessPieces[1][4] = ChessPiece.PAWN_BLACK;
-        chessPieces[1][5] = ChessPiece.PAWN_BLACK;
-        chessPieces[1][7] = ChessPiece.PAWN_BLACK;
-        chessPieces[2][0] = ChessPiece.PAWN_BLACK;
-        chessPieces[2][2] = ChessPiece.KNIGHT_BLACK;
-        chessPieces[2][6] = ChessPiece.PAWN_BLACK;
-        chessPieces[3][0] = ChessPiece.QUEEN_BLACK;
-        chessPieces[3][3] = ChessPiece.BISHOP_WHITE;
-        chessPieces[4][3] = ChessPiece.BISHOP_BLACK;
-        chessPieces[4][4] = ChessPiece.PAWN_WHITE;
-        chessPieces[5][4] = ChessPiece.BISHOP_WHITE;
-        chessPieces[5][5] = ChessPiece.PAWN_WHITE;
-        chessPieces[6][0] = ChessPiece.PAWN_WHITE;
-        chessPieces[6][3] = ChessPiece.QUEEN_WHITE;
-        chessPieces[6][5] = ChessPiece.PAWN_WHITE;
-        chessPieces[6][7] = ChessPiece.PAWN_WHITE;
-        chessPieces[7][5] = ChessPiece.ROOK_WHITE;
-        chessPieces[7][6] = ChessPiece.KING_WHITE;
+    public static void addFigure(int lineNumber, char columnIndex, ChessPiece chessPiece) {
+        int horizontalPosition = chessPieces.length - lineNumber;
+        int verticalPosition = indexes.get(columnIndex);
 
-        ChessBoard chessBoard = new ChessBoard(chessPieces);
-        chessBoard.print();
+        chessPieces[horizontalPosition][verticalPosition] = chessPiece;
+    }
+
+    public static Map<Character, Integer> fillMap() {
+        Map<Character, Integer> indexes = new HashMap<>();
+        int index = 0;
+        for (char ch = 'a'; ch < 'i'; ch++) {
+            indexes.put(ch, index);
+            index++;
+        }
+        return indexes;
     }
 }
