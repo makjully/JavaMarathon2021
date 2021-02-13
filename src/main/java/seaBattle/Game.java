@@ -1,5 +1,7 @@
 package seaBattle;
 
+// fix_1
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,6 +9,7 @@ import java.util.*;
 
 public class Game {
     public static void main(String[] args) throws IOException {
+        boolean isCorrect;
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
         GameBoard gb1 = new GameBoard();
@@ -19,12 +22,22 @@ public class Game {
         gamer2.setOpponent(gamer1);
 
         System.out.printf("Начнем расставлять корабли на поле %s\n", gamer1);
+        gb1.print();
         startDialog(gb1, reader);
 
         System.out.printf("Начнем расставлять корабли на поле %s\n", gamer2);
+        gb2.print();
         startDialog(gb2, reader);
 
-        play(random(gamer1, gamer2), reader);
+        do {
+            isCorrect = true;
+            try {
+                play(random(gamer1, gamer2), reader);
+            } catch (Exception e) {
+                System.out.println("Некорректный ввод!");
+                isCorrect = false;
+            }
+        } while (!isCorrect);
     }
 
     public static void startDialog(GameBoard gb, BufferedReader reader) throws IOException {
@@ -57,8 +70,6 @@ public class Game {
 
         checkUserInput("Введи координаты четвертого однопалубного корабля (формат: x,y)",
                 gb, reader, 1);
-
-        gb.print();
     }
 
     public static void checkUserInput(String console, GameBoard gb, BufferedReader reader, int numberDecks) throws IOException {
@@ -71,8 +82,13 @@ public class Game {
             } catch (IllegalArgumentException e) {
                 isCorrect = false;
                 System.out.println(e.getMessage());
+            } catch (IndexOutOfBoundsException e) {
+                System.out.println("Некорректное количество координат");
+                isCorrect = false;
             }
         } while (!isCorrect);
+
+        gb.print();
     }
 
     public static boolean isCorrect(String userInput, GameBoard gb, int numberDecks) {
