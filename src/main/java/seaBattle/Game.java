@@ -1,6 +1,6 @@
 package seaBattle;
 
-// fix_1
+// fix_2
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -131,8 +131,26 @@ public class Game {
                 }
             }
 
-            if (horizontalCount != list.size() && verticalCount != list.size()) {
-                throw new IllegalArgumentException("Непоследовательно идущие ячейки. Введи верные координаты");
+            for (int i = 0; i < list.size() - 1; i++) {
+                if (horizontalCount < verticalCount) {
+                    int current = list.get(i)[0];
+                    int next = list.get(i + 1)[0];
+                    if (next - current != 1) {
+                        isCorrect = false;
+                        break;
+                    }
+                } else {
+                    int current = list.get(i)[1];
+                    int next = list.get(i + 1)[1];
+                    if (next - current != 1) {
+                        isCorrect = false;
+                        break;
+                    }
+                }
+            }
+
+            if (horizontalCount != list.size() && verticalCount != list.size() || !isCorrect) {
+                throw new IllegalArgumentException("Введи верные координаты (последовательно - от меньшей к большей)");
             }
         }
         gb.addShip(list);
