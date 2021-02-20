@@ -6,13 +6,15 @@ import java.util.List;
 public class GameBoard {
     private Cell[][] cells;
     private List<Ship> ships;
+    private Cell[][] showed;
 
     public GameBoard() {
         this.cells = fillBoard();
+        this.showed = fillBoard();
         ships = new ArrayList<>();
     }
 
-    public void print() {
+    public void print(Cell[][] cells) {
         System.out.println("Игровое поле:");
         for (int i = 0; i < cells.length; i++) {
             for (int j = 0; j < cells[i].length; j++) {
@@ -23,7 +25,7 @@ public class GameBoard {
     }
 
     private Cell[][] fillBoard() {
-        cells = new Cell[10][10];
+        Cell[][] cells = new Cell[10][10];
 
         for (int i = 0; i < cells.length; i++) {
             for (int j = 0; j < cells[i].length; j++) {
@@ -42,7 +44,11 @@ public class GameBoard {
         return cells;
     }
 
-    public void addShip(List<Integer[]> coordinates) {
+    public Cell[][] getShowed() {
+        return showed;
+    }
+
+    public void addShip(List<Integer[]> coordinates) throws InvalidInputException {
         int x1 = coordinates.get(0)[0];
         int y1 = coordinates.get(0)[1];
         int x2 = coordinates.get(coordinates.size() - 1)[0];
@@ -158,7 +164,7 @@ public class GameBoard {
         }
 
         if (isShip) {
-            throw new IllegalArgumentException("Вокруг корабля должна быть область шириной в одну клетку, " +
+            throw new InvalidInputException("Вокруг корабля должна быть область шириной в одну клетку, " +
                     "в которой не может быть других кораблей (ореол корабля)");
         }
 

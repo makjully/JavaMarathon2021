@@ -1,6 +1,6 @@
 package seaBattle;
 
-// fix_2
+// fix_3
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,7 +9,6 @@ import java.util.*;
 
 public class Game {
     public static void main(String[] args) throws IOException {
-        boolean isCorrect;
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
         GameBoard gb1 = new GameBoard();
@@ -22,22 +21,14 @@ public class Game {
         gamer2.setOpponent(gamer1);
 
         System.out.printf("Начнем расставлять корабли на поле %s\n", gamer1);
-        gb1.print();
+        gb1.print(gb1.getCells());
         startDialog(gb1, reader);
 
         System.out.printf("Начнем расставлять корабли на поле %s\n", gamer2);
-        gb2.print();
+        gb2.print(gb2.getCells());
         startDialog(gb2, reader);
 
-        do {
-            isCorrect = true;
-            try {
-                play(random(gamer1, gamer2), reader);
-            } catch (Exception e) {
-                System.out.println("Некорректный ввод!");
-                isCorrect = false;
-            }
-        } while (!isCorrect);
+        play(random(gamer1, gamer2), reader);
     }
 
     public static void startDialog(GameBoard gb, BufferedReader reader) throws IOException {
@@ -79,24 +70,27 @@ public class Game {
             System.out.println(console);
             try {
                 isCorrect = isCorrect(reader.readLine(), gb, numberDecks);
-            } catch (IllegalArgumentException e) {
+            } catch (InvalidInputException e) {
                 isCorrect = false;
                 System.out.println(e.getMessage());
             } catch (IndexOutOfBoundsException e) {
-                System.out.println("Некорректное количество координат");
+                System.out.println("Некорректное положение разделителя или количество координат");
                 isCorrect = false;
+            } catch (IllegalArgumentException e) {
+                isCorrect = false;
+                System.out.println("Вводим только цифры без пробелов!");
             }
         } while (!isCorrect);
 
-        gb.print();
+        gb.print(gb.getCells());
     }
 
-    public static boolean isCorrect(String userInput, GameBoard gb, int numberDecks) {
+    public static boolean isCorrect(String userInput, GameBoard gb, int numberDecks) throws InvalidInputException {
         boolean isCorrect = true;
         String[] cells = userInput.trim().split(";");
 
         if (userInput.equals("") || numberDecks != cells.length)
-            throw new IllegalArgumentException("Некорректный ввод данных! Будь внимательнее.");
+            throw new InvalidInputException("Некорректный ввод данных! Будь внимательнее.");
 
         List<Integer[]> list = new ArrayList<>();
 
@@ -111,7 +105,7 @@ public class Game {
             int y = numbers[1];
             isCorrect = isCorrectPair(x, y);
             if (gb.getCells()[x][y] == Cell.SHIP) {
-                throw new IllegalArgumentException("Ячейка занята другим кораблем. Координаты: " + x + "," + y);
+                throw new InvalidInputException("Ячейка занята другим кораблем. Координаты: " + x + "," + y);
             }
         }
 
@@ -150,7 +144,7 @@ public class Game {
             }
 
             if (horizontalCount != list.size() && verticalCount != list.size() || !isCorrect) {
-                throw new IllegalArgumentException("Введи верные координаты (последовательно - от меньшей к большей)");
+                throw new InvalidInputException("Введи верные координаты (последовательно - от меньшей к большей)");
             }
         }
         gb.addShip(list);
@@ -158,22 +152,27 @@ public class Game {
         return isCorrect;
     }
 
-    public static void play(Gamer gamer, BufferedReader reader) throws IOException {
+    public static void play(Gamer gamer, BufferedReader reader) {
         boolean isCorrect;
-        int x;
-        int y;
+        int x = 0;
+        int y = 0;
+
+        System.out.println("\n------------------------------------------------");
+        gamer.printOpponentBoard();
 
         do {
             System.out.printf("%s, твой ход! Введи координаты ячейки (формат: x,y)\n", gamer);
-
-            String[] cells = reader.readLine().trim().split(",");
-            x = Integer.parseInt(cells[0]);
-            y = Integer.parseInt(cells[1]);
             try {
+                String[] cells = reader.readLine().trim().split(",");
+                x = Integer.parseInt(cells[0]);
+                y = Integer.parseInt(cells[1]);
                 isCorrect = isCorrectPair(x, y);
-            } catch (IllegalArgumentException e) {
+            } catch (InvalidInputException e) {
                 isCorrect = false;
                 System.out.println(e.getMessage());
+            } catch (Exception e) {
+                isCorrect = false;
+                System.out.println("Данные должны быть введены согласно формату: x,y");
             }
         } while (!isCorrect);
 
@@ -185,6 +184,9 @@ public class Game {
             play(gamer.getOpponent(), reader);
         } else if (result.equals("Попадание!") || result.equals("Утопил!")) {
             play(gamer, reader);
+        } else if (result.equals("Повтор!")) {
+            System.out.printf("%s, ты повторяешься: x = %d, y = %d были введены ранее. Ход переходит к %s\n", gamer, x, y, gamer.getOpponent());
+            play(gamer.getOpponent(), reader);
         } else if (result.equals("Игра окончена!")) {
             System.out.printf("Последний корабль %s был потоплен. Победу одерживает %s. Поздравляем!",
                     gamer.getOpponent(), gamer);
@@ -192,9 +194,9 @@ public class Game {
         }
     }
 
-    public static boolean isCorrectPair(int x, int y) {
+    public static boolean isCorrectPair(int x, int y) throws InvalidInputException {
         if (x < 0 || y < 0 || x > 9 || y > 9) {
-            throw new IllegalArgumentException("Координаты должны быть в диапазоне [0-9]");
+            throw new InvalidInputException("Координаты должны быть в диапазоне [0-9]");
         }
         return true;
     }
@@ -208,11 +210,11 @@ public class Game {
         return gamers[index];
     }
 
-    public static boolean isValidList(List<Integer[]> list) {
+    public static boolean isValidList(List<Integer[]> list) throws InvalidInputException {
         for (int i = list.size() - 1; i >= 0; i--) {
             for (int j = 1; j < i; j++) {
                 if (list.get(i)[0] == list.get(j)[0] && list.get(i)[1] == list.get(j)[1]) {
-                    throw new IllegalArgumentException("Совпадающие координаты");
+                    throw new InvalidInputException("Совпадающие координаты");
                 }
             }
         }
